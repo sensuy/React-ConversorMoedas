@@ -22,7 +22,7 @@ describe('Teste do componente de conversão de moedas', () => {
     fireEvent.click(getByTestId('btn-converter'));
     const modal = await findByTestId('modal'); // 1 BRL = 0.19 USD
     expect(axiosMock.get).toHaveBeenCalledTimes(1);
-    expect(modal).toHaveTextContent('1 BRL = 0.19 USD')
+    expect(modal).toHaveTextContent('1 BRL = 0.19 USD');
   });
 
 });
