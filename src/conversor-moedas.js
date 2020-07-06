@@ -19,6 +19,7 @@ function ConversorMoedas() {
   const [formValidado, setFormValidado] = useState(false);
   const [exibirModal, setExibirModal] = useState(false);
   const [resultadoConversao, setResultadoConversao] = useState('');
+  const [exibirMsgErro, setExibirMsgErro] = useState(false);
 
   function handleValor(event) {
     setValor(event.target.value.replace(/\D/g, ''));
@@ -48,11 +49,22 @@ function ConversorMoedas() {
       axios.get(FIXER_URL)
         .then(resp => {
           const cotacao = obterCotacao(resp.data);
+          if (cotacao) {
+            setResultadoConversao(`${valor} ${moedaDe} = ${cotacao} ${moedaPara}`);
+            setExibirModal(true);
+            setExibirSpinner(false);
+            setExibirMsgErro(false);
+          } else {
+            exibirErro();
+          }
         })
+        .catch(err => exibirErro());
     }
   }
 
   function obterCotacao(dadosCotacao) {
+    console.log(dadosCotacao);
+
     if (!dadosCotacao || dadosCotacao.success !== true) {
       return false;
     }
@@ -62,10 +74,15 @@ function ConversorMoedas() {
     const cotacao = (1 / cotacaoDe * cotacaoPara) * valor;
     return cotacao.toFixed(2);
   }
+
+  function exibirErro() {
+    setExibirMsgErro(true);
+    setExibirSpinner(false);
+  }
   return (
     <div>
       <h1>Conversor de moedas</h1>
-      <Alert variant="danger" show={false}>
+      <Alert variant="danger" show={exibirMsgErro}>
         Erro obtendo dados de conversão, tente novamente.
       </Alert>
       <Jumbotron>
@@ -99,7 +116,7 @@ function ConversorMoedas() {
               </Form.Control>
             </Col>
             <Col sm="2">
-              <Button variant="success" type="submit">
+              <Button variant="success" type="submit" data-testid="btn-converter">
                 <span className={exibirSpinner ? null : 'hidden'}>
                   <Spinner animation="border" size="sm" />
                 </span>
@@ -110,7 +127,7 @@ function ConversorMoedas() {
             </Col>
           </Form.Row>
         </Form>
-        <Modal show={exibirModal} onHide={handleFecharModal}>
+        <Modal show={exibirModal} onHide={handleFecharModal} data-testid="modal">
           <Modal.Header closeButton>
             <Modal.Title>
               Conversão
